@@ -10,9 +10,11 @@ from torchvision import transforms as T
 
 
 # URL = 'ftp://guest:GU.205dldo@ftp.softronics.ch/mvtec_anomaly_detection/mvtec_anomaly_detection.tar.xz'
-CLASS_NAMES = ['bottle', 'cable', 'capsule', 'carpet', 'grid',
-               'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
-               'tile', 'toothbrush', 'transistor', 'wood', 'zipper']
+# CLASS_NAMES = ['bottle', 'cable', 'capsule', 'carpet', 'grid',
+#                'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
+#                'tile', 'toothbrush', 'transistor', 'wood', 'zipper']
+# CLASS_NAMES = ['cake', 'osenbei']
+CLASS_NAMES = ['osenbei', 'osenbei_mask']
 
 
 class MVTecDataset(Dataset):
@@ -31,6 +33,8 @@ class MVTecDataset(Dataset):
 
         # load dataset
         self.x, self.y, self.mask = self.load_dataset_folder()
+        # print(self.x)
+        # print(len(self.x))
 
         # set transforms
         self.transform_x = T.Compose([T.Resize(resize, Image.ANTIALIAS),
@@ -45,14 +49,16 @@ class MVTecDataset(Dataset):
     def __getitem__(self, idx):
         x, y, mask = self.x[idx], self.y[idx], self.mask[idx]
 
+        # print(idx, x)
         x = Image.open(x).convert('RGB')
         x = self.transform_x(x)
 
-        if y == 0:
-            mask = torch.zeros([1, self.cropsize, self.cropsize])
-        else:
-            mask = Image.open(mask)
-            mask = self.transform_mask(mask)
+        # if y == 0:
+        #     mask = torch.zeros([1, self.cropsize, self.cropsize])
+        # else:
+        #     mask = Image.open(mask)
+        #     mask = self.transform_mask(mask)
+        mask = torch.zeros([1, self.cropsize, self.cropsize])
 
         return x, y, mask
 

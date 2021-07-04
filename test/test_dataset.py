@@ -10,7 +10,7 @@ from datasets.mvtec import MVTecDataset
 class TestMyDataset(unittest.TestCase):
     def test_dataset(self):
         datafolder = 'data/mvtec'
-        dataset = MVTecDataset(datafolder)
+        dataset = MVTecDataset(datafolder, is_train=True)
         print('length:', len(dataset))
         dataloader = DataLoader(
             dataset,
