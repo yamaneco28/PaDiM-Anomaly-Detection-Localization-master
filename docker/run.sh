@@ -1,0 +1,1 @@
+docker-compose exec ubuntu python3 main.py --data_path data/datasets/ --arch resnet18

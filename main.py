@@ -28,6 +28,7 @@ import time
 # device setup
 use_cuda = torch.cuda.is_available()
 device = torch.device('cuda' if use_cuda else 'cpu')
+print('device:', device)
 
 
 def parse_args():
@@ -83,9 +84,9 @@ def main():
     for class_name in mvtec.CLASS_NAMES:
 
         train_dataset = mvtec.MVTecDataset(args.data_path, class_name=class_name, is_train=True)
-        train_dataloader = DataLoader(train_dataset, batch_size=32, pin_memory=True)
+        train_dataloader = DataLoader(train_dataset, batch_size=64, pin_memory=True)
         test_dataset = mvtec.MVTecDataset(args.data_path, class_name=class_name, is_train=True)
-        test_dataloader = DataLoader(test_dataset, batch_size=32, pin_memory=True)
+        test_dataloader = DataLoader(test_dataset, batch_size=64, pin_memory=True)
 
         train_outputs = OrderedDict([('layer1', []), ('layer2', []), ('layer3', [])])
         test_outputs = OrderedDict([('layer1', []), ('layer2', []), ('layer3', [])])
