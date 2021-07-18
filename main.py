@@ -22,6 +22,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.models import wide_resnet50_2, resnet18
 import datasets.mvtec as mvtec
+import time
 
 
 # device setup
@@ -50,6 +51,8 @@ def main():
         model = wide_resnet50_2(pretrained=True, progress=True)
         t_d = 1792
         d = 550
+    from fp16util import network_to_half
+    model = network_to_half(model)
     model.to(device)
     model.eval()
     random.seed(1024)
@@ -93,7 +96,8 @@ def main():
             for (x, _, _) in tqdm(train_dataloader, '| feature extraction | train | %s |' % class_name):
                 # model prediction
                 with torch.no_grad():
-                    _ = model(x.to(device))
+                    # _ = model(x.to(device))
+                    _ = model(x.to(device).half())
                 # get intermediate layer outputs
                 for k, v in zip(train_outputs.keys(), outputs):
                     train_outputs[k].append(v.cpu().detach())
@@ -132,18 +136,24 @@ def main():
         test_imgs = []
 
         # extract test set features
+        start = time.time()
         for (x, y, mask) in tqdm(test_dataloader, '| feature extraction | test | %s |' % class_name):
             test_imgs.extend(x.cpu().detach().numpy())
             gt_list.extend(y.cpu().detach().numpy())
             gt_mask_list.extend(mask.cpu().detach().numpy())
             # model prediction
             with torch.no_grad():
-                _ = model(x.to(device))
+                # _ = model(x.to(device))
+                _ = model(x.to(device).half())
             # get intermediate layer outputs
             for k, v in zip(test_outputs.keys(), outputs):
                 test_outputs[k].append(v.cpu().detach())
             # initialize hook outputs
             outputs = []
+
+        end = time.time()
+        print('inference time:', (end-start)/len(test_dataset))
+
         for k, v in test_outputs.items():
             test_outputs[k] = torch.cat(v, 0)
 
@@ -185,12 +195,12 @@ def main():
         img_scores = scores.reshape(scores.shape[0], -1).max(axis=1)
         gt_list = np.asarray(gt_list)
         fpr, tpr, _ = roc_curve(gt_list, img_scores)
-        print(gt_list)
-        print(img_scores)
+        # print(gt_list)
+        # print(img_scores)
         img_roc_auc = roc_auc_score(gt_list, img_scores)
         total_roc_auc.append(img_roc_auc)
         print('image ROCAUC: %.3f' % (img_roc_auc))
-        fig_img_rocauc.plot(fpr, tpr, label='%s img_ROCAUC: %.3f' % (class_name, img_roc_auc))
+        # fig_img_rocauc.plot(fpr, tpr, label='%s img_ROCAUC: %.3f' % (class_name, img_roc_auc))
 
         # get optimal threshold
         gt_mask = np.asarray(gt_mask_list)
@@ -202,6 +212,9 @@ def main():
         # print(threshold)
         threshold = 0.9
 
+        end = time.time()
+        print('inference time:', (end-start)/len(test_dataset))
+
         # calculate per-pixel level ROCAUC
         # fpr, tpr, _ = roc_curve(gt_mask.flatten(), scores.flatten())
         # per_pixel_rocauc = roc_auc_score(gt_mask.flatten(), scores.flatten())
@@ -209,26 +222,20 @@ def main():
         # print('pixel ROCAUC: %.3f' % (per_pixel_rocauc))
 
         # fig_pixel_rocauc.plot(fpr, tpr, label='%s ROCAUC: %.3f' % (class_name, per_pixel_rocauc))
-<<<<<<< HEAD
-        save_dir = args.save_path + '/' + f'pictures_{args.arch}'
-        os.makedirs(save_dir, exist_ok=True)
-        plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
-=======
         # save_dir = args.save_path + '/' + f'pictures_{args.arch}'
         # os.makedirs(save_dir, exist_ok=True)
         # plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
->>>>>>> main
 
-    print('Average ROCAUC: %.3f' % np.mean(total_roc_auc))
-    fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
-    fig_img_rocauc.legend(loc="lower right")
+    # print('Average ROCAUC: %.3f' % np.mean(total_roc_auc))
+    # fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
+    # fig_img_rocauc.legend(loc="lower right")
 
     # print('Average pixel ROCUAC: %.3f' % np.mean(total_pixel_roc_auc))
     # fig_pixel_rocauc.title.set_text('Average pixel ROCAUC: %.3f' % np.mean(total_pixel_roc_auc))
     # fig_pixel_rocauc.legend(loc="lower right")
 
-    fig.tight_layout()
-    fig.savefig(os.path.join(args.save_path, 'roc_curve.png'), dpi=100)
+    # fig.tight_layout()
+    # fig.savefig(os.path.join(args.save_path, 'roc_curve.png'), dpi=100)
 
 
 def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):

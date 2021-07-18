@@ -14,7 +14,7 @@ from torchvision import transforms as T
 #                'hazelnut', 'leather', 'metal_nut', 'pill', 'screw',
 #                'tile', 'toothbrush', 'transistor', 'wood', 'zipper']
 # CLASS_NAMES = ['cake', 'osenbei']
-CLASS_NAMES = ['osenbei', 'osenbei_mask']
+CLASS_NAMES = ['osenbei_mask']
 
 
 class MVTecDataset(Dataset):
