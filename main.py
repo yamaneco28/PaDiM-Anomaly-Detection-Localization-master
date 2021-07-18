@@ -185,12 +185,12 @@ def main():
         img_scores = scores.reshape(scores.shape[0], -1).max(axis=1)
         gt_list = np.asarray(gt_list)
         fpr, tpr, _ = roc_curve(gt_list, img_scores)
-        print(gt_list)
-        print(img_scores)
+        # print(gt_list)
+        # print(img_scores)
         img_roc_auc = roc_auc_score(gt_list, img_scores)
         total_roc_auc.append(img_roc_auc)
         print('image ROCAUC: %.3f' % (img_roc_auc))
-        fig_img_rocauc.plot(fpr, tpr, label='%s img_ROCAUC: %.3f' % (class_name, img_roc_auc))
+        # fig_img_rocauc.plot(fpr, tpr, label='%s img_ROCAUC: %.3f' % (class_name, img_roc_auc))
 
         # get optimal threshold
         gt_mask = np.asarray(gt_mask_list)
@@ -209,26 +209,20 @@ def main():
         # print('pixel ROCAUC: %.3f' % (per_pixel_rocauc))
 
         # fig_pixel_rocauc.plot(fpr, tpr, label='%s ROCAUC: %.3f' % (class_name, per_pixel_rocauc))
-<<<<<<< HEAD
-        save_dir = args.save_path + '/' + f'pictures_{args.arch}'
-        os.makedirs(save_dir, exist_ok=True)
-        plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
-=======
         # save_dir = args.save_path + '/' + f'pictures_{args.arch}'
         # os.makedirs(save_dir, exist_ok=True)
         # plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
->>>>>>> main
 
     print('Average ROCAUC: %.3f' % np.mean(total_roc_auc))
-    fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
-    fig_img_rocauc.legend(loc="lower right")
+    # fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
+    # fig_img_rocauc.legend(loc="lower right")
 
     # print('Average pixel ROCUAC: %.3f' % np.mean(total_pixel_roc_auc))
     # fig_pixel_rocauc.title.set_text('Average pixel ROCAUC: %.3f' % np.mean(total_pixel_roc_auc))
     # fig_pixel_rocauc.legend(loc="lower right")
 
-    fig.tight_layout()
-    fig.savefig(os.path.join(args.save_path, 'roc_curve.png'), dpi=100)
+    # fig.tight_layout()
+    # fig.savefig(os.path.join(args.save_path, 'roc_curve.png'), dpi=100)
 
 
 def plot_fig(test_img, scores, gts, threshold, save_dir, class_name):
