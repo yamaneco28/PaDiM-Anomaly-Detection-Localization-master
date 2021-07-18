@@ -70,9 +70,9 @@ def main():
     model.layer3[-1].register_forward_hook(hook)
 
     os.makedirs(os.path.join(args.save_path, 'temp_%s' % args.arch), exist_ok=True)
-    fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-    fig_img_rocauc = ax[0]
-    fig_pixel_rocauc = ax[1]
+    # fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+    # fig_img_rocauc = ax[0]
+    # fig_pixel_rocauc = ax[1]
 
     total_roc_auc = []
     total_pixel_roc_auc = []
@@ -146,7 +146,7 @@ def main():
             outputs = []
         for k, v in test_outputs.items():
             test_outputs[k] = torch.cat(v, 0)
-        
+
         # Embedding concat
         embedding_vectors = test_outputs['layer1']
         for layer_name in ['layer2', 'layer3']:
@@ -154,7 +154,7 @@ def main():
 
         # randomly select d dimension
         embedding_vectors = torch.index_select(embedding_vectors, 1, idx)
-        
+
         # calculate distance matrix
         B, C, H, W = embedding_vectors.size()
         embedding_vectors = embedding_vectors.view(B, C, H * W).numpy()
@@ -171,16 +171,16 @@ def main():
         dist_list = torch.tensor(dist_list)
         score_map = F.interpolate(dist_list.unsqueeze(1), size=x.size(2), mode='bilinear',
                                   align_corners=False).squeeze().numpy()
-        
+
         # apply gaussian smoothing on the score map
         for i in range(score_map.shape[0]):
             score_map[i] = gaussian_filter(score_map[i], sigma=4)
-        
+
         # Normalization
         max_score = score_map.max()
         min_score = score_map.min()
         scores = (score_map - min_score) / (max_score - min_score)
-        
+
         # calculate image-level ROC AUC score
         img_scores = scores.reshape(scores.shape[0], -1).max(axis=1)
         gt_list = np.asarray(gt_list)
@@ -189,7 +189,7 @@ def main():
         total_roc_auc.append(img_roc_auc)
         print('image ROCAUC: %.3f' % (img_roc_auc))
         fig_img_rocauc.plot(fpr, tpr, label='%s img_ROCAUC: %.3f' % (class_name, img_roc_auc))
-        
+
         # get optimal threshold
         gt_mask = np.asarray(gt_mask_list)
         precision, recall, thresholds = precision_recall_curve(gt_mask.flatten(), scores.flatten())
@@ -204,10 +204,10 @@ def main():
         total_pixel_roc_auc.append(per_pixel_rocauc)
         print('pixel ROCAUC: %.3f' % (per_pixel_rocauc))
 
-        fig_pixel_rocauc.plot(fpr, tpr, label='%s ROCAUC: %.3f' % (class_name, per_pixel_rocauc))
-        save_dir = args.save_path + '/' + f'pictures_{args.arch}'
-        os.makedirs(save_dir, exist_ok=True)
-        plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
+        # fig_pixel_rocauc.plot(fpr, tpr, label='%s ROCAUC: %.3f' % (class_name, per_pixel_rocauc))
+        # save_dir = args.save_path + '/' + f'pictures_{args.arch}'
+        # os.makedirs(save_dir, exist_ok=True)
+        # plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
 
     print('Average ROCAUC: %.3f' % np.mean(total_roc_auc))
     fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
@@ -279,7 +279,7 @@ def denormalization(x):
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
     x = (((x.transpose(1, 2, 0) * std) + mean) * 255.).astype(np.uint8)
-    
+
     return x
 
 

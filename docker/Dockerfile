@@ -1,4 +1,3 @@
-# FROM ubuntu:20.04
 FROM nvcr.io/nvidia/l4t-base:r32.5.0
 
 # skip timezone setting
@@ -24,15 +23,32 @@ RUN apt-get update && \
     curl \
     git \
     vim \
-    python3-pip \
     lsb-release \
     gnupg
 
-# install python package
-RUN apt-get install -y --no-install-recommends python3-matplotlib
+# python setting
+RUN apt-get update && apt-get install -y python3.7 python3-pip
 RUN pip3 install --upgrade pip
+RUN apt-get install -y python3-matplotlib
 WORKDIR /root/requirements
 ADD requirements.txt /root/requirements
 RUN pip3 install -r requirements.txt
 
+# install pytorch
+RUN wget https://nvidia.box.com/shared/static/p57jwntv436lfrd78inwl7iml6p13fzh.whl -O torch-1.8.0-cp36-cp36m-linux_aarch64.whl
+RUN apt-get install -y libopenblas-base libopenmpi-dev
+RUN pip3 install Cython
+RUN pip3 install numpy torch-1.8.0-cp36-cp36m-linux_aarch64.whl
+# RUN pip3 install scikit-image
+
+# torchvision
+# RUN apt-get install -y libjpeg-dev zlib1g-dev libpython3-dev libavcodec-dev libavformat-dev libswscale-dev
+# RUN export BUILD_VERSION=0.9.0
+# RUN git clone --branch $BUILD_VERSION https://github.com/pytorch/vision torchvision
+# RUN cd torchvision
+# RUN python3 setup.py install --user
+# RUN cd ../  # attempting to load torchvision from build dir will result in import error
+# RUN pip3 install 'pillow<7' # always needed for Python 2.7, not needed torchvision v0.5.0+ with Python 3.6
+
+# work directory setting
 WORKDIR /root/workspace
