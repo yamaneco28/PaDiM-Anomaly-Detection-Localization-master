@@ -70,9 +70,9 @@ def main():
     model.layer3[-1].register_forward_hook(hook)
 
     os.makedirs(os.path.join(args.save_path, 'temp_%s' % args.arch), exist_ok=True)
-    fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-    fig_img_rocauc = ax[0]
-    fig_pixel_rocauc = ax[1]
+    # fig, ax = plt.subplots(1, 2, figsize=(20, 10))
+    # fig_img_rocauc = ax[0]
+    # fig_pixel_rocauc = ax[1]
 
     total_roc_auc = []
     total_pixel_roc_auc = []
@@ -209,9 +209,15 @@ def main():
         # print('pixel ROCAUC: %.3f' % (per_pixel_rocauc))
 
         # fig_pixel_rocauc.plot(fpr, tpr, label='%s ROCAUC: %.3f' % (class_name, per_pixel_rocauc))
+<<<<<<< HEAD
         save_dir = args.save_path + '/' + f'pictures_{args.arch}'
         os.makedirs(save_dir, exist_ok=True)
         plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
+=======
+        # save_dir = args.save_path + '/' + f'pictures_{args.arch}'
+        # os.makedirs(save_dir, exist_ok=True)
+        # plot_fig(test_imgs, scores, gt_mask_list, threshold, save_dir, class_name)
+>>>>>>> main
 
     print('Average ROCAUC: %.3f' % np.mean(total_roc_auc))
     fig_img_rocauc.title.set_text('Average image ROCAUC: %.3f' % np.mean(total_roc_auc))
